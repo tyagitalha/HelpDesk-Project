@@ -33,7 +33,7 @@ const createTicket = asyncHandler(async (req, res) => {
 
     return res.status(200)
         .json(
-            new ApiResponse(200, {}, "ticket created successFully")
+            new ApiResponse(201, {}, "ticket created successFully")
         )
 })
 
@@ -42,7 +42,7 @@ const getAllTicket = asyncHandler(async (req, res) => {
     const user = req.user?._id
     console.log("user", user);
     if (!user) {
-        throw new ApiError(400, "User id not Access")
+        throw new ApiError(401, "User id not Access")
     }
 
     const ticketId = await Ticket.find(
@@ -52,9 +52,7 @@ const getAllTicket = asyncHandler(async (req, res) => {
     ).select("-createdAt -updatedAt")
     console.log("ticket", ticketId);
 
-    if (!ticketId) {
-        throw new ApiError(400, "CreatedBy id are invalid")
-    }
+   
 
     return res.status(200)
         .json(
@@ -70,7 +68,7 @@ const getOneTicket = asyncHandler(async (req, res) => {
 
     const user = req.user?._id
     if (!user) {
-        throw new ApiError(400, "user is invalid")
+        throw new ApiError(401, "user is invalid")
     }
 
     const filter = {
@@ -87,9 +85,6 @@ const getOneTicket = asyncHandler(async (req, res) => {
         filter.status = req.body.status
     }
 
-    if (!filter) {
-        throw new ApiError(400, "can not access any property")
-    }
 
     const ticket = await Ticket.find(filter)
         .sort({ createdAt: -1 });
@@ -146,4 +141,32 @@ const updateTicket = asyncHandler(async (req, res) => {
         );
 });
 
-export { createTicket, getAllTicket, getOneTicket, updateTicket }
+const daleteTicket = asyncHandler(async (req, res) => {
+    //get ticket id and access user id from middleware
+    //use $set and undefined refreshToken 
+    //and httpOnly and secure are true
+
+    const userId = req.user?._id
+    const { ticketId } = req.params
+
+
+    console.log("userId", userId);
+    console.log("ticketId", ticketId);
+
+    const ticket = await Ticket.findOneAndDelete(
+        {
+            _id: ticketId,
+            createdBy: userId
+        }
+    )
+
+    if(!ticket){
+        throw new ApiError(404,"Ticket not found")
+    }
+    console.log("ticket", ticket);
+    return res.status(200)
+    .json(new ApiResponse(200,{},"Ticket Delete SuccessFull"))
+
+})
+
+export { createTicket, getAllTicket, getOneTicket, updateTicket, daleteTicket }
