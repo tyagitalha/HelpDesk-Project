@@ -31,6 +31,10 @@ const ticketSchema = new Schema(
         createdBy: {
             type: mongoose.Types.ObjectId,
             ref: "User"
+        },
+        assignTo: {
+            type: mongoose.Types.ObjectId,
+            ref: "User"
         }
     },
     {
