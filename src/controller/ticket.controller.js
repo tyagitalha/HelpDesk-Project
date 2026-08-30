@@ -142,9 +142,6 @@ const updateTicket = asyncHandler(async (req, res) => {
 });
 
 const daleteTicket = asyncHandler(async (req, res) => {
-    //get ticket id and access user id from middleware
-    //use $set and undefined refreshToken 
-    //and httpOnly and secure are true
 
     const userId = req.user?._id
     const { ticketId } = req.params
