@@ -29,11 +29,11 @@ const ticketSchema = new Schema(
             default: "open"
         },
         createdBy: {
-            type: mongoose.Types.ObjectId,
+            type: mongoose.Schema.Types.ObjectId,
             ref: "User"
         },
         assignTo: {
-            type: mongoose.Types.ObjectId,
+            type: mongoose.Schema.Types.ObjectId,
             ref: "User"
         }
     },
