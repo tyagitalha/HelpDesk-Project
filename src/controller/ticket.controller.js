@@ -52,7 +52,7 @@ const getAllTicket = asyncHandler(async (req, res) => {
     ).select("-createdAt -updatedAt")
     console.log("ticket", ticketId);
 
-   
+
 
     return res.status(200)
         .json(
@@ -63,39 +63,149 @@ const getAllTicket = asyncHandler(async (req, res) => {
 })
 
 
+const getTicket = asyncHandler(async (req, res) => {
+
+    try {
+
+        const { search, category, status, priority, page = 1, limit = 10 } = req.query
+
+        const filter = {}
+
+        if (search) {
+            filter.$or = [
+                {
+                    title: {
+                        $regex: search,
+                        $options: "i"
+                    }
+                },
+                {
+                    description: {
+                        $regex: search,
+                        $options: "i"
+                    }
+                }
+            ]
+        }
+
+        if (category) {
+            filter.category = category
+        }
+
+        if (status) {
+            filter.status = status
+        }
+
+        if (priority) {
+            filter.priority = priority
+        }
+
+        //pagination calculation 
+
+        const pageNumber = Number(page)
+        const limitNumber = Number(limit)
+
+        const skip = (pageNumber - 1) * limitNumber
+
+
+
+
+        const user = req.user?._id
+        const { ticketId } = req.params
+
+        console.log("user", user);
+        console.log("ticket", ticketId)
+
+        const ticket = await Ticket.find(filter)
+            .skip(skip)
+            .limit(limitNumber)
+            .sort({ createdAt: -1 })
+
+        // const ticket = await Ticket.findOne(
+        //     {
+        //         _id: ticketId,
+        //         createdBy: user
+        //     }
+        // )
+        // console.log("ticket", ticket);
+
+        console.log("filter:", filter);
+        console.log("ticket:", ticket);
+
+        if (!ticket) {
+            throw new ApiError(400, "ticket not find")
+        }
+
+        return res.status(200)
+            .json(new ApiResponse(200, {
+                // data: {
+                //     ticket,
+                //     pagination: {
+                //         currentPage: pageNumber,
+                //         limit: limitNumber,
+                //         totalTickets,
+                //         totalPages,
+
+                //         hasNextPage: pageNumber < totalPages,
+                //         hasPreviousPage: pageNumber > 1
+                //     }
+                // }
+            }, "Get One Ticket"))
+    } catch (error) {
+        throw new ApiError(500, "Failed to fetch tickets")
+    }
+})
+
 const getOneTicket = asyncHandler(async (req, res) => {
 
-
-    const user = req.user?._id
-    if (!user) {
-        throw new ApiError(401, "user is invalid")
-    }
-
-    const filter = {
-        createdBy: user
-    };
-
-    if (req.body.category) {
-        filter.category = req.body.category;
-    }
-    if (req.body.priority) {
-        filter.priority = req.body.priority
-    }
-    if (req.body.status) {
-        filter.status = req.body.status
-    }
+    try {
 
 
-    const ticket = await Ticket.find(filter)
-        .sort({ createdAt: -1 });
 
-    console.log("ticket", ticket);
+        const user = req.user?._id
+        const { ticketId } = req.params
 
-    return res.status(200)
-        .json(
-            new ApiResponse(200, {}, "Access One ticket")
+        console.log("user", user);
+        console.log("ticket", ticketId)
+
+        const ticket = await Ticket.findOne(
+            {
+                _id: ticketId,
+                createdBy: user
+            }
         )
+        // const ticket = await Ticket.findOne(
+        //     {
+        //         _id: ticketId,
+        //         createdBy: user
+        //     }
+        // )
+        // console.log("ticket", ticket);
+
+        if (!ticket) {
+            throw new ApiError(400, "ticket not find")
+        }
+
+        return res.status(200)
+            .json(new ApiResponse(200, {
+                // data: {
+                //     ticket,
+                //     pagination: {
+                //         currentPage: pageNumber,
+                //         limit: limitNumber,
+                //         totalTickets,
+                //         totalPages,
+
+                //         hasNextPage: pageNumber < totalPages,
+                //         hasPreviousPage: pageNumber > 1
+                //     }
+                // }
+            }, "Get One Ticket"))
+    } catch (error) {
+        throw new ApiError(500, "Failed to fetch tickets")
+    }
 })
+
 
 const updateTicket = asyncHandler(async (req, res) => {
     const { title, description, priority, category } = req.body;
@@ -157,13 +267,13 @@ const daleteTicket = asyncHandler(async (req, res) => {
         }
     )
 
-    if(!ticket){
-        throw new ApiError(404,"Ticket not found")
+    if (!ticket) {
+        throw new ApiError(404, "Ticket not found")
     }
     console.log("ticket", ticket);
     return res.status(200)
-    .json(new ApiResponse(200,{},"Ticket Delete SuccessFull"))
+        .json(new ApiResponse(200, {}, "Ticket Delete SuccessFull"))
 
 })
 
-export { createTicket, getAllTicket, getOneTicket, updateTicket, daleteTicket }
+export { createTicket, getAllTicket, getTicket, updateTicket, daleteTicket, getOneTicket }
