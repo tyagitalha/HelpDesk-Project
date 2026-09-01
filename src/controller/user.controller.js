@@ -64,12 +64,12 @@ const registerUser = asyncHandler(async (req, res) => {
             password,
             fullName,
             username: username.toLowerCase(),
-            role : "user"
+            role,
         }
     )
 
-    console.log("user" , user);
-    
+    console.log("user", user);
+
     const createdUser = await User.findById(user._id).select("-password -refreshToken")
 
     if (!createdUser) {
@@ -96,7 +96,7 @@ const loginUser = asyncHandler(async (req, res) => {
 
     const { email, username, password } = req.body
 
-    
+
 
     if (!(email || username)) {
         throw new ApiError(400, "email and username is invalid")
@@ -105,20 +105,20 @@ const loginUser = asyncHandler(async (req, res) => {
     const user = await User.findOne({
         $or: [{ email }, { username }]
     })
-   
+
     if (!user) {
         throw new ApiError(404, "User does not exist")
     }
-    
+
 
     const isPasswordvalid = await user.isPasswordCorrect(password)
-   
+
     if (!isPasswordvalid) {
         throw new ApiError(400, "password is required")
     }
 
     const { accessToken, refreshToken } = await genreateAccessAndRefreshToken(user._id)
-    
+
 
 
     const loggedInUser = await User.findById(user._id).select("-password -refreshToken")
@@ -141,18 +141,30 @@ const loginUser = asyncHandler(async (req, res) => {
         ))
 })
 
-const logout = asyncHandler(async(req,res) => {
+const logout = asyncHandler(async (req, res) => {
+    await User.findByIdAndUpdate(
+        req.user?._id,
+        {
+            $set: {
+                refreshToken: undefined
+            }
+        }
+    )
+    const options = {
+        httpOnly: true,
+        secure: true
+    }
 
-    
+    return res
+        .status(200)
+        .clearCookie("refreshToken", options)
+        .clearCookie("accessToken", options)
+        .json(new ApiResponse(200, {}, "User loged Out"
+        ))
+
 })
 
-const refreshAccessToken = asyncHandler(async(req,res) => {})
+const refreshAccessToken = asyncHandler(async (req, res) => { })
 
 
-const getCurrentUser = asyncHandler(async(req,res) => {})
-
-const changeCurrentPassword = asyncHandler(async(req,res) => {})
-
-// const 
-
-export { registerUser, loginUser }
+export { registerUser, loginUser, logout, refreshAccessToken }
