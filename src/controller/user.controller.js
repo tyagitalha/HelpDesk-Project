@@ -58,6 +58,13 @@ const registerUser = asyncHandler(async (req, res) => {
         throw new ApiError(400, "username and email are already existed")
     }
 
+    const { accessToken, refreshToken } = await genreateAccessAndRefreshToken(createdUser._id)
+
+    const options = {
+        httpOnly: true,
+        secure: false   // login wale jaisa consistent — local dev ke liye
+    }
+
     const user = await User.create(
         {
             email,
@@ -77,7 +84,13 @@ const registerUser = asyncHandler(async (req, res) => {
     }
 
     return res.status(200)
-        .json(new ApiResponse(200, {}, "User register SuccessFully"))
+        .cookie("accessToken", accessToken, options)
+        .cookie("refreshToken", refreshToken, options)
+        .json(new ApiResponse(
+            200,
+            { user: createdUser, accessToken, refreshToken },
+            "User register SuccessFully"
+        ))
 
 })
 
@@ -125,7 +138,7 @@ const loginUser = asyncHandler(async (req, res) => {
 
     const options = {
         httpOnly: true,
-        secure: true
+        secure: false
     }
 
     return res
@@ -164,7 +177,10 @@ const logout = asyncHandler(async (req, res) => {
 
 })
 
-const refreshAccessToken = asyncHandler(async (req, res) => { })
+const getCurrentUser = asyncHandler(async (req, res) => {
+    return res.status(200)
+        .json(new ApiResponse(200, req.user, "current user fetched successfully"))
+})
 
 
-export { registerUser, loginUser, logout, refreshAccessToken }
+export { registerUser, loginUser, logout, getCurrentUser }
