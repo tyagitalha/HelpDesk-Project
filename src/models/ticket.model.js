@@ -21,7 +21,7 @@ const ticketSchema = new Schema(
             type: String,
             required: true,
             trim: true,
-            enum: ["high", "mediume", "low"]
+            enum: ["high", "medium", "low"]
         },
         status: {
             type: String,
