@@ -58,7 +58,7 @@ const registerUser = asyncHandler(async (req, res) => {
         throw new ApiError(400, "username and email are already existed")
     }
 
-    const { accessToken, refreshToken } = await genreateAccessAndRefreshToken(createdUser._id)
+
 
     const options = {
         httpOnly: true,
@@ -78,6 +78,8 @@ const registerUser = asyncHandler(async (req, res) => {
     console.log("user", user);
 
     const createdUser = await User.findById(user._id).select("-password -refreshToken")
+
+    const { accessToken, refreshToken } = await genreateAccessAndRefreshToken(createdUser._id)
 
     if (!createdUser) {
         throw new ApiError(500, "something went wrong while registring the user")
@@ -107,7 +109,7 @@ const loginUser = asyncHandler(async (req, res) => {
     //return res
     //with copokie and json (give id ref , refresh , access)
 
-    const { email, username, password } = req.body
+    const { email, username, role, password } = req.body
 
 
 
@@ -138,7 +140,7 @@ const loginUser = asyncHandler(async (req, res) => {
 
     const options = {
         httpOnly: true,
-        secure: false
+        secure: true
     }
 
     return res
