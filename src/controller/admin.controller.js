@@ -15,7 +15,7 @@ const allTicket = asyncHandler(async (req, res) => {
 
     return res.status(200)
         .json(
-            new ApiResponse(200, {}, "Get All Ticket")
+            new ApiResponse(200, {Tickets : ticket}, "Get All Ticket")
         )
 })
 
@@ -33,7 +33,7 @@ const oneticket = asyncHandler(async (req, res) => {
 
     return res.status(200)
         .json(
-            new ApiResponse(200, {}, "Get One Ticket")
+            new ApiResponse(200, {Tickets : ticket}, "Get One Ticket")
         )
 })
 
@@ -66,7 +66,7 @@ const updateStatus = asyncHandler(async (req, res) => {
     return res.status(200)
         .json(
             new ApiResponse(
-                200, {}, "status chamge success fully"
+                200, {Tickets : ticket}, "status chamge success fully"
             )
         )
 })
@@ -98,7 +98,7 @@ const updatePriority = asyncHandler(async (req, res) => {
 
     return res.status(200)
         .json(
-            new ApiResponse(200, {}, "priority update success full")
+            new ApiResponse(200, {Tickets : ticket}, "priority update success full")
         )
 })
 
@@ -132,7 +132,7 @@ const assignTicket = asyncHandler(async (req, res) => {
 
     return res.status(200)
         .json(
-            new ApiResponse(200, {}, "Assigne Ticket  success full")
+            new ApiResponse(200, {Tickets : ticket}, "Assigne Ticket  success full")
         )
 })
 
