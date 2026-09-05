@@ -8,11 +8,15 @@ import { Ticket } from "../models/ticket.model.js";
 const createTicket = asyncHandler(async (req, res) => {
     const { title, description, category, priority, status, createdBy } = req.body
 
+
     if (
-        [title, description, category, priority, status, createdBy].some((field) => field?.trim() === "")
+        [title, description, category, priority].some((field) => field?.trim() === "")
     ) {
         throw new ApiError(400, "All field are required")
     }
+
+    console.log("BODY:", req.body)
+    console.log("USER:", req.user)
 
     const ticket = await Ticket.create(
         {
@@ -20,7 +24,6 @@ const createTicket = asyncHandler(async (req, res) => {
             description,
             category,
             priority,
-            status,
             createdBy: req.user?._id
         }
     )
@@ -33,14 +36,14 @@ const createTicket = asyncHandler(async (req, res) => {
 
     return res.status(200)
         .json(
-            new ApiResponse(201, {createTicket}, "ticket created successFully")
+            new ApiResponse(201, { tickets: createdTicket }, "ticket created successFully")
         )
 })
 
 const getAllTicket = asyncHandler(async (req, res) => {
 
     const user = req.user?._id
-  
+
     if (!user) {
         throw new ApiError(401, "User id not Access")
     }
@@ -88,7 +91,7 @@ const getTicket = asyncHandler(async (req, res) => {
             ]
         }
 
-       
+
         if (category) filter.category = category.toLowerCase()
         if (status) filter.status = status.toLowerCase()
         if (priority) filter.priority = priority.toLowerCase()
@@ -102,6 +105,8 @@ const getTicket = asyncHandler(async (req, res) => {
 
 
         const user = req.user?._id
+
+        filter.createdBy = user
 
         const ticket = await Ticket.find(filter)
             .skip(skip)
@@ -136,16 +141,16 @@ const getOneTicket = asyncHandler(async (req, res) => {
                 createdBy: user
             }
         )
-        
+
 
         if (!ticket) {
             throw new ApiError(400, "ticket not find")
         }
 
         return res.status(200)
-            .json(new ApiResponse(200, {tickets : ticket}, "Get One Ticket"))
+            .json(new ApiResponse(200, { tickets: ticket }, "Get One Ticket"))
     } catch (error) {
-        throw new ApiError(500, "Failed to fetch tickets")
+        throw new ApiError(404, "Failed to fetch tickets")
     }
 })
 
@@ -194,7 +199,7 @@ const updateTicket = asyncHandler(async (req, res) => {
         );
 });
 
-const daleteTicket = asyncHandler(async (req, res) => {
+const deleteTicket = asyncHandler(async (req, res) => {
 
     const userId = req.user?._id
     const { ticketId } = req.params
@@ -216,4 +221,4 @@ const daleteTicket = asyncHandler(async (req, res) => {
 
 })
 
-export { createTicket, getAllTicket, getTicket, updateTicket, daleteTicket, getOneTicket }
+export { createTicket, getAllTicket, getTicket, updateTicket, deleteTicket, getOneTicket }
